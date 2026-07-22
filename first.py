@@ -314,7 +314,10 @@ def create_calculator():
             )
 
         return demo
-
 if __name__ == "__main__":
     app = create_calculator()
-    app.launch(share=True)
+    app.launch(
+        server_name="0.0.0.0",                       # Allows Railway to route external traffic to your app
+        server_port=int(os.environ.get("PORT", 7860)), # Dynamic port injection assigned by Railway
+        share=False                                  # Disables the local WAN tunneling causing the crash
+    )
