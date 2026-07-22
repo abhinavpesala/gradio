@@ -1,3 +1,4 @@
+import os
 import math
 import gradio as gr
 
@@ -252,7 +253,7 @@ def create_calculator():
             fn=clear_history_stack, outputs=[history_list, history_display]
         )
 
-        for char, btn_obj in btn_map.items():
+       for char, btn_obj in btn_map.items():
             if char == "=":
                 btn_obj.click(
                     fn=execute_calculation,
@@ -268,28 +269,34 @@ def create_calculator():
             else:
                 btn_obj.click(
                     fn=add_char,
-                    inputs=[gr.State(char), equation],
+                    inputs=[btn_obj, equation],
+                    outputs=[display, equation],
+                )
+                            else:
+                btn_obj.click(
+                    fn=add_char,
+                    inputs=[btn_obj, equation],
                     outputs=[display, equation],
                 )
 
         btn_paren_open.click(
             fn=add_char,
-            inputs=[gr.State("("), equation],
+            inputs=[btn_paren_open, equation],
             outputs=[display, equation],
         )
         btn_paren_close.click(
             fn=add_char,
-            inputs=[gr.State(")"), equation],
+            inputs=[btn_paren_close, equation],
             outputs=[display, equation],
         )
         btn_pow.click(
             fn=add_char,
-            inputs=[gr.State("x^y"), equation],
+            inputs=[btn_pow, equation],
             outputs=[display, equation],
         )
         btn_fact.click(
             fn=add_char,
-            inputs=[gr.State("x!"), equation],
+            inputs=[btn_fact, equation],
             outputs=[display, equation],
         )
 
@@ -307,17 +314,21 @@ def create_calculator():
         }
 
         for btn_obj, func_identifier in sc_buttons.items():
+            func_state = gr.State(value=func_identifier)
             btn_obj.click(
                 fn=run_scientific_eval,
-                inputs=[gr.State(func_identifier), equation, angle_mode],
+                inputs=[func_state, equation, angle_mode],
                 outputs=[display, equation],
             )
 
         return demo
+
+
 if __name__ == "__main__":
     app = create_calculator()
     app.launch(
-        server_name="0.0.0.0",                       # Allows Railway to route external traffic to your app
-        server_port=int(os.environ.get("PORT", 7860)), # Dynamic port injection assigned by Railway
-        share=False                                  # Disables the local WAN tunneling causing the crash
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", 7860)),
+        share=False,
     )
+
